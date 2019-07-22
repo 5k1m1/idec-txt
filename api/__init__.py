@@ -1,23 +1,32 @@
 import os
 import shutil
+import sys
 from api import base
 from datetime import datetime
 
 node = ""
+auth = ""
 echoareas = []
 fileechoareas = []
 
 
 def load_config():
-    global node, echoareas, fileechoareas
+    global node, auth, echoareas, fileechoareas
     node = ""
     echoareas = []
-    config = open("idec.cfg").read().split("\n")
+    try:
+        config = open("idec.cfg").read().split("\n")
+    except FileNotFoundError as exception:
+        print(exception)
+        sys.exit(1)
+
     for line in config:
         param = line.split()
         if len(param) > 0:
             if param[0] == "node":
                 node = param[1]
+            elif param[0] == "auth":
+                auth = param[1]
             elif param[0] == "echo":
                 echoareas.append(param[1])
             elif param[0] == "fecho":

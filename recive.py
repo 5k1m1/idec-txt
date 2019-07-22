@@ -3,6 +3,7 @@
 import api
 import base64
 import os
+import shutil
 import sys
 import urllib.request
 from api import base
@@ -112,7 +113,8 @@ def download_filemail():
     for s in index:
         download_file(s[0], s[1])
 
-        
+
+shutil.rmtree("mail")
 base.check_base()
 api.load_config()
 download_mail()
