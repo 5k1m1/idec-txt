@@ -17,7 +17,8 @@ def split(l, size=40):
 
 
 def build_counts(counts):
-    return {y[0]: int(y[1]) for y in (x.split(":") for x in counts.split("\n") if ":" in x)}
+    return {y[0]: int(y[1])
+            for y in (x.split(":") for x in counts.split("\n") if ":" in x)}
 
 
 def download_echoarea_counts():
@@ -168,6 +169,7 @@ def download_filemail():
         print("new files not found")
     for s in index:
         download_file(s[0], s[1])
+
 
 if os.path.exists("mail"):
     shutil.rmtree("mail")

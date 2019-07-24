@@ -5,6 +5,7 @@ import sys
 from api import base
 from datetime import datetime
 
+
 node = ""
 auth = ""
 echoareas = []
@@ -71,11 +72,13 @@ def mail_rebuild():
             )
             i += 1
 
+
 def read_echoarea_lasts():
     try:
         return json.loads(open("echo_counts.json", "r").read())
     except FileNotFoundError:
         return {}
+
 
 def save_echoarea_lasts(lasts):
     dump = json.dumps(lasts, sort_keys=True, indent=4)
@@ -87,6 +90,7 @@ def read_fileechoarea_lasts():
         return json.loads(open("echo_counts.json", "r").read())
     except FileNotFoundError:
         return {}
+
 
 def save_fileechoarea_lasts(lasts):
     dump = json.dumps(lasts, sort_keys=True, indent=4)
