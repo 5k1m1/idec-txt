@@ -1,5 +1,6 @@
-api/__pycache__*
+*__pycache__*
 base/
 mail/
 idec.cfg
 *.txt
+*_counts.json
