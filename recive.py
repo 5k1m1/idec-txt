@@ -3,6 +3,7 @@
 import api
 import base64
 import os
+import re
 import shutil
 import sys
 import urllib.request
@@ -17,8 +18,10 @@ def split(l, size=40):
 
 
 def build_counts(counts):
-    return {y[0]: int(y[1])
-            for y in (x.split(":") for x in counts.split("\n") if ":" in x)}
+    d = {}
+    for (key, vaule) in re.findall("(.+):(.+)\n", counts):
+        d[key] = value
+    return d
 
 
 def download_echoarea_counts():
