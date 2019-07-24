@@ -8,6 +8,8 @@ def check_base():
         os.makedirs("base/echo")
     if not os.path.exists("base/msg"):
         os.makedirs("base/msg")
+    if not os.path.exists("mail"):
+        os.makedirs("mail")
     if not os.path.exists("fecho"):
         os.makedirs("fecho")
     if not os.path.exists("idec.cfg"):

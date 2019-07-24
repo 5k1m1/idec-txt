@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import sys
@@ -8,10 +9,12 @@ node = ""
 auth = ""
 echoareas = []
 fileechoareas = []
+depth = 50
+fdepth = 10
 
 
 def load_config():
-    global node, auth, echoareas, fileechoareas
+    global node, auth, echoareas, fileechoareas, depth, fdepth
     node = ""
     echoareas = []
     try:
@@ -27,6 +30,10 @@ def load_config():
                 node = param[1]
             elif param[0] == "auth":
                 auth = param[1]
+            elif param[0] == "depth":
+                depth = int(param[1])
+            elif param[0] == "fdepth":
+                fdepth = int(param[1])
             elif param[0] == "echo":
                 echoareas.append(param[1])
             elif param[0] == "fecho":
@@ -63,3 +70,24 @@ def mail_rebuild():
                 render_message(msgid, base.read_message(msgid))
             )
             i += 1
+
+def read_echoarea_lasts():
+    try:
+        return json.loads(open("echo_counts.json", "r").read())
+    except FileNotFoundError:
+        return {}
+
+def save_echoarea_lasts(lasts):
+    dump = json.dumps(lasts, sort_keys=True, indent=4)
+    open("echo_counts.json", "w").write(dump)
+
+
+def read_fileechoarea_lasts():
+    try:
+        return json.loads(open("echo_counts.json", "r").read())
+    except FileNotFoundError:
+        return {}
+
+def save_fileechoarea_lasts(lasts):
+    dump = json.dumps(lasts, sort_keys=True, indent=4)
+    open("fecho_counts.json", "w").write(dump)

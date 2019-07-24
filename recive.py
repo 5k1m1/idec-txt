@@ -16,14 +16,66 @@ def split(l, size=40):
         yield l[i:i+size]
 
 
-def download_index():
-    msgids = []
-    r = urllib.request.Request(
-        "{0}u/e/{1}".format(api.node, "/".join(api.echoareas))
-    )
+def build_counts(counts):
+    return {y[0]: int(y[1]) for y in (x.split(":") for x in counts.split("\n") if ":" in x)}
+
+
+def download_echoarea_counts():
+    r = urllib.request.Request("{0}x/c/{1}".format(api.node,
+                               "/".join(api.echoareas)))
     with urllib.request.urlopen(r) as f:
-        raw = f.read().decode("utf-8").split()
-        msgids = [msgid for msgid in raw if filter.is_msgid(msgid)]
+        return build_counts(f.read().decode("utf-8"))
+
+
+def download_fileechoarea_counts():
+    r = urllib.request.Request("{0}f/c/{1}".format(api.node,
+                               "/".join(api.fileechoareas)))
+    with urllib.request.urlopen(r) as f:
+        return build_counts(f.read().decode("utf-8"))
+
+
+def get_echoarea_counts():
+    remote = download_echoarea_counts()
+    local = api.read_echoarea_lasts()
+    api.save_echoarea_lasts(remote)
+    return remote, local
+
+
+def get_fileechoarea_counts():
+    remote = download_fileechoarea_counts()
+    local = api.read_fileechoarea_lasts()
+    api.save_fileechoarea_lasts(remote)
+    return remote, local
+
+
+def calculate_offset(echoareas=True):
+    remote, local = {}, {}
+    if echoareas:
+        remote, local = get_echoarea_counts()
+    else:
+        remote, local = get_fileechoarea_counts()
+    offset = -1
+    for echoarea, count in remote.items():
+        if echoarea in local:
+            if count > local[echoarea]:
+                offset = count - local[echoarea]
+        else:
+            return api.depth
+    return offset
+
+
+def download_index():
+    print("download echoareas index")
+    offset = calculate_offset()
+    msgids = []
+    if offset > -1:
+        r = urllib.request.Request(
+            "{0}u/e/{1}/-{2}:{2}".format(api.node, "/".join(api.echoareas),
+                                         offset)
+        )
+        with urllib.request.urlopen(r) as f:
+            raw = f.read().decode("utf-8").split()
+            msgids = [msgid for msgid in raw if filter.is_msgid(msgid)]
     return msgids
 
 
@@ -61,6 +113,8 @@ def debundle(bundle):
 
 def download_mail():
     index = build_diff(read_local_index(), download_index())
+    if len(index) == 0:
+        print("new messages not found")
     open("newmail.txt", "w").write("")
     for s in split(index):
         debundle(download_bundle(s))
@@ -74,9 +128,11 @@ def read_local_fileindex():
 
 def download_fecho_index():
     print("download file echoareas index")
+    offset = calculate_offset(False)
     ids = []
     r = urllib.request.Request(
-        "{0}f/e/{1}".format(api.node, "/".join(api.fileechoareas))
+        "{0}f/e/{1}/-{2}:{2}".format(api.node, "/".join(api.fileechoareas),
+                                     offset)
     )
     with urllib.request.urlopen(r) as f:
         raw = f.read().decode("utf-8").split("\n")
@@ -113,8 +169,8 @@ def download_filemail():
     for s in index:
         download_file(s[0], s[1])
 
-
-shutil.rmtree("mail")
+if os.path.exists("mail"):
+    shutil.rmtree("mail")
 base.check_base()
 api.load_config()
 download_mail()
